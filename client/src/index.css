@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.dark body {
+  background: #020617;
+  color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.present-day {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-radius: 999px;
+}
+
+.half-day {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-radius: 999px;
+}
+
+.absent-day {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-radius: 999px;
+}
