@@ -126,11 +126,13 @@ const loginEmployee = async (req, res) => {
       });
 
     const userIP =
-      req.headers[
-        "x-forwarded-for"
-      ] ||
+      req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
       req.socket.remoteAddress ||
       "Unknown";
+
+    console.log("LOGIN IP:", userIP);
+
+
 
     const allowedIP =
       await WhitelistIP.findOne({
