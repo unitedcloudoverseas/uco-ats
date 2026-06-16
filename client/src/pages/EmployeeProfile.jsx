@@ -501,7 +501,7 @@ const getStatusForDate =
           {employee?.profilePhoto ? (
 
         <img
-        src={`http://localhost:5000/uploads/profile/${employee.profilePhoto}`}
+        src={`https://uco-ats.onrender.com/uploads/profile/${employee.profilePhoto}`}
         alt="Profile"
         className="
         h-full
