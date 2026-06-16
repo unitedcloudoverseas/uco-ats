@@ -126,15 +126,13 @@ const loginEmployee = async (req, res) => {
       });
 
       const userIP =
-        req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
-        req.socket.remoteAddress ||
-        "Unknown";
+      req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+      req.socket.remoteAddress ||
+      "Unknown";
 
-      console.log("================================");
-      console.log("LOGIN IP:", userIP);
-      console.log("FORWARDED:", req.headers["x-forwarded-for"]);
-      console.log("REMOTE:", req.socket.remoteAddress);
-      console.log("================================");
+    console.log("================================");
+    console.log("RENDER LOGIN IP:", userIP);
+    console.log("================================");
 
 
 
