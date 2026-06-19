@@ -192,33 +192,50 @@ const loginEmployee = async (req, res) => {
     console.log("Existing Attendance:", existingAttendance);
     console.log("===========================");
 
-    let attendanceMarked =
-      false;
+    let attendanceMarked = false;
 
-    if (
+if (
   !existingAttendance &&
   allowedIP &&
   employee.role === "employee"
 ) {
-  console.log("INSIDE ATTENDANCE BLOCK");
+
+  console.log(
+    "INSIDE ATTENDANCE BLOCK"
+  );
 
   try {
-    const attendance = await Attendance.create({
-      employeeId: employee._id,
-      date: today,
-      loginTime: new Date(),
-      ipAddress: userIP,
-      status: "Present",
-    });
+
+    const attendance =
+      await Attendance.create({
+
+        employeeId:
+          employee._id,
+
+        date:
+          today,
+
+        loginTime:
+          new Date(),
+
+        ipAddress:
+          userIP,
+
+        status:
+          "Present",
+
+      });
 
     console.log(
       "ATTENDANCE CREATED:",
-      attendance
+      attendance._id
     );
 
     attendanceMarked = true;
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.log(
       "ATTENDANCE CREATE ERROR:"
@@ -227,55 +244,30 @@ const loginEmployee = async (req, res) => {
     console.log(err);
 
   }
-} {
-      console.log(
-        "CREATING ATTENDANCE..."
-      );
 
+}
 
+if (
+  existingAttendance &&
+  !existingAttendance.loginTime &&
+  allowedIP
+) {
 
-      const attendance =
-        await Attendance.create({
-          employeeId:
-            employee._id,
-          date: today,
-          loginTime:
-            new Date(),
-          ipAddress:
-            userIP,
-          status:
-            "Present",
-        });
+  existingAttendance.loginTime =
+    new Date();
 
-      console.log(
-        "ATTENDANCE CREATED:",
-        attendance._id
-      );
+  existingAttendance.ipAddress =
+    userIP;
 
-      attendanceMarked =
-        true;
-    }
+  await existingAttendance.save();
 
-    if (
-      existingAttendance &&
-      !existingAttendance.loginTime &&
-      allowedIP
-    ) {
-      existingAttendance.loginTime =
-        new Date();
+  console.log(
+    "UPDATED EXISTING ATTENDANCE LOGIN TIME"
+  );
 
-      existingAttendance.ipAddress =
-        userIP;
+  attendanceMarked = true;
 
-      await existingAttendance.save();
-
-      console.log(
-        "UPDATED EXISTING ATTENDANCE LOGIN TIME"
-      );
-
-      attendanceMarked =
-        true;
-    }
+}
 
     const token = jwt.sign(
       {
