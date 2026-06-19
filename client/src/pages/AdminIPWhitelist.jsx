@@ -20,8 +20,14 @@ const AdminIPWhitelist = () => {
   useEffect(() => {
 
     fetchIPs();
+    fetchDetectedIPs();
 
   }, []);
+
+  const [
+    detectedIPs,
+    setDetectedIPs,
+  ] = useState([]);
 
   const fetchIPs =
   async () => {
@@ -139,6 +145,84 @@ const AdminIPWhitelist = () => {
     }
 
 };
+
+const fetchDetectedIPs =
+async () => {
+
+  try {
+
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    const response =
+      await API.get(
+        "/admin/detected-ips",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+    setDetectedIPs(
+      response.data
+    );
+
+  }
+
+  catch (error) {
+
+    console.log(error);
+
+  }
+
+};
+
+const approveIP =
+async (id) => {
+
+  try {
+
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    await API.post(
+      `/admin/detected-ip/${id}/approve`,
+      {},
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success(
+      "IP Whitelisted"
+    );
+
+    fetchIPs();
+
+    fetchDetectedIPs();
+
+  }
+
+  catch (error) {
+
+    toast.error(
+      "Failed"
+    );
+
+  }
+
+};
+
+
 return (
 
   <div className="p-8">
@@ -566,6 +650,146 @@ return (
       </div>
 
     </div>
+
+    <div
+  className="
+  bg-white
+  dark:bg-slate-900
+  border
+  border-slate-200
+  dark:border-slate-800
+  rounded-3xl
+  overflow-hidden
+  mt-8
+  "
+>
+
+  <div className="p-6">
+
+    <h2
+      className="
+      text-xl
+      font-semibold
+      "
+    >
+      Detected Login IPs
+    </h2>
+
+    <p
+      className="
+      text-sm
+      text-slate-500
+      mt-1
+      "
+    >
+      Recently detected employee login IPs
+    </p>
+
+  </div>
+
+  <div className="overflow-x-auto">
+
+    <table className="w-full">
+
+      <thead>
+
+        <tr
+          className="
+          border-t
+          border-slate-200
+          dark:border-slate-800
+          "
+        >
+
+          <th className="p-5 text-left">
+            IP Address
+          </th>
+
+          <th className="p-5 text-left">
+            Employee
+          </th>
+
+          <th className="p-5 text-left">
+            Last Seen
+          </th>
+
+          <th className="p-5 text-left">
+            Action
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {
+          detectedIPs.map(
+            (ip) => (
+
+              <tr
+                key={ip._id}
+                className="
+                border-t
+                border-slate-100
+                dark:border-slate-800
+                "
+              >
+
+                <td className="p-5">
+                  {ip.ipAddress}
+                </td>
+
+                <td className="p-5">
+                  {ip.employeeName}
+                </td>
+
+                <td className="p-5">
+
+                  {
+                    new Date(
+                      ip.lastSeen
+                    ).toLocaleString()
+                  }
+
+                </td>
+
+                <td className="p-5">
+
+                  <button
+                    onClick={() =>
+                      approveIP(
+                        ip._id
+                      )
+                    }
+                    className="
+                    px-4
+                    py-2
+                    rounded-xl
+                    bg-green-600
+                    hover:bg-green-700
+                    text-white
+                    cursor-pointer
+                    "
+                  >
+                    Add To Whitelist
+                  </button>
+
+                </td>
+
+              </tr>
+
+            )
+          )
+        }
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
 
   </div>
 

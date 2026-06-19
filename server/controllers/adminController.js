@@ -2,6 +2,7 @@ const Employee = require("../models/Employee");
 const Leave = require("../models/Leave");
 const Attendance = require("../models/Attendance");
 const WhitelistIP = require("../models/WhitelistIP");
+const DetectedIP = require("../models/DetectedIP");
 
 const getDashboardStats = async (
   req,
@@ -855,6 +856,106 @@ async (req, res) => {
 
 };
 
+const getDetectedIPs =
+async (req, res) => {
+
+  try {
+
+    const ips =
+      await DetectedIP
+      .find()
+      .sort({
+        lastSeen: -1,
+      });
+
+    res.status(200)
+    .json(ips);
+
+  }
+
+  catch (error) {
+
+    res.status(500)
+    .json({
+      message:
+        error.message,
+    });
+
+  }
+
+};
+
+const addDetectedIPToWhitelist =
+async (req, res) => {
+
+  try {
+
+    const detectedIP =
+      await DetectedIP.findById(
+        req.params.id
+      );
+
+    if (!detectedIP) {
+
+      return res.status(404)
+      .json({
+        message:
+          "IP not found",
+      });
+
+    }
+
+    const exists =
+      await WhitelistIP.findOne({
+
+        ipAddress:
+          detectedIP.ipAddress,
+
+      });
+
+    if (exists) {
+
+      return res.status(400)
+      .json({
+        message:
+          "Already whitelisted",
+      });
+
+    }
+
+    await WhitelistIP.create({
+
+      ipAddress:
+        detectedIP.ipAddress,
+
+      location:
+        "Auto Approved",
+
+      isActive:
+        true,
+
+    });
+
+    res.status(200)
+    .json({
+      message:
+        "Added to whitelist",
+    });
+
+  }
+
+  catch (error) {
+
+    res.status(500)
+    .json({
+      message:
+        error.message,
+    });
+
+  }
+
+};
+
 module.exports = {
   getDashboardStats,
   getRecentEmployees,
@@ -875,5 +976,7 @@ module.exports = {
   getWhitelistIPs,
   addWhitelistIP,
   deleteWhitelistIP,
+  getDetectedIPs,
+  addDetectedIPToWhitelist,
 
 };

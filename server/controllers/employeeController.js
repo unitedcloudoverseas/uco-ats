@@ -3,10 +3,12 @@ const Attendance = require("../models/Attendance");
 
 const bcrypt = require("bcryptjs");
 
-const WhitelistIP =
-require(
-  "../models/WhitelistIP"
-);
+const WhitelistIP = require("../models/WhitelistIP");
+
+const DetectedIP =
+require("../models/DetectedIP");
+
+const LeaveBalance = require("../models/LeaveBalance");
 
 const registerEmployee = async (req, res) => {
   try {
@@ -58,7 +60,6 @@ const registerEmployee = async (req, res) => {
 };
 
 const jwt = require("jsonwebtoken");
-
 
 const loginEmployee = async (req, res) => {
 
@@ -112,8 +113,8 @@ const loginEmployee = async (req, res) => {
 
     const today =
       new Date()
-      .toISOString()
-      .split("T")[0];
+        .toISOString()
+        .split("T")[0];
 
     const existingAttendance =
       await Attendance.findOne({
@@ -125,16 +126,40 @@ const loginEmployee = async (req, res) => {
 
       });
 
-      const userIP =
+    const userIP =
       req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
       req.socket.remoteAddress ||
       "Unknown";
 
+      await DetectedIP.findOneAndUpdate(
+
+      {
+        ipAddress: userIP,
+      },
+
+      {
+        ipAddress: userIP,
+
+        employeeId:
+          employee._id,
+
+        employeeName:
+          employee.fullName,
+
+        lastSeen:
+          new Date(),
+      },
+
+      {
+        upsert: true,
+        new: true,
+      }
+
+    );
+
     console.log("================================");
     console.log("RENDER LOGIN IP:", userIP);
     console.log("================================");
-
-
 
     const allowedIP =
       await WhitelistIP.findOne({
@@ -150,14 +175,10 @@ const loginEmployee = async (req, res) => {
       false;
 
     if (
-
       !existingAttendance &&
-
       allowedIP &&
-
       employee.role ===
       "employee"
-
     ) {
 
       await Attendance.create({
@@ -262,45 +283,43 @@ const loginEmployee = async (req, res) => {
 
 };
 
-
-
-    /* =========================
-   GET MY PROFILE
-  ========================= */
+/* =========================
+ GET MY PROFILE
+=========================== */
 
 const getMyProfile =
-async (req, res) => {
+  async (req, res) => {
 
-  try {
+    try {
 
-    const employee =
-      await Employee.findById(
-        req.employee._id
-      ).select("-password");
+      const employee =
+        await Employee.findById(
+          req.employee._id
+        ).select("-password");
 
-    if (!employee) {
+      if (!employee) {
 
-      return res.status(404).json({
+        return res.status(404).json({
+          message:
+            "Employee not found",
+        });
+
+      }
+
+      res.status(200).json(
+        employee
+      );
+
+    } catch (error) {
+
+      res.status(500).json({
         message:
-          "Employee not found",
+          error.message,
       });
 
     }
 
-    res.status(200).json(
-      employee
-    );
-
-  } catch (error) {
-
-    res.status(500).json({
-      message:
-        error.message,
-    });
-
-  }
-
-};
+  };
 
 const logoutEmployee = async (
   req,
@@ -310,8 +329,8 @@ const logoutEmployee = async (
 
     const today =
       new Date()
-      .toISOString()
-      .split("T")[0];
+        .toISOString()
+        .split("T")[0];
 
     const attendance =
       await Attendance.findOne({
@@ -327,7 +346,7 @@ const logoutEmployee = async (
       });
     }
 
-    /* =========================
+    /* ======================
       BREAK VALIDATION
     ========================= */
 
@@ -342,18 +361,18 @@ const logoutEmployee = async (
 
     }
 
-    /* =========================
+    /* =======================
       LOGOUT TIME
     ========================= */
 
     attendance.logoutTime =
       new Date();
 
-      /* =========================
-        TOTAL HOURS
-      ========================= */
+    /* =========================
+      TOTAL HOURS
+    ========================= */
 
-      const totalHours =
+    const totalHours =
       (
         attendance.logoutTime -
         attendance.loginTime
@@ -362,26 +381,26 @@ const logoutEmployee = async (
         1000 * 60 * 60
       );
 
-      attendance.totalHours =
-        totalHours;
+    attendance.totalHours =
+      totalHours;
 
-      /* =========================
-        EFFECTIVE HOURS
-      ========================= */
+    /* ======================
+      EFFECTIVE HOURS
+    ========================= */
 
-      const effectiveHours =
-        totalHours -
-        (
-          attendance.breakMinutes /
-          60
-        );
+    const effectiveHours =
+      totalHours -
+      (
+        attendance.breakMinutes /
+        60
+      );
 
-      attendance.effectiveHours =
-        effectiveHours;
+    attendance.effectiveHours =
+      effectiveHours;
 
     if (
-          effectiveHours >= 8
-        ) {
+      effectiveHours >= 8
+    ) {
       attendance.status =
         "Present";
     } else if (
@@ -422,7 +441,7 @@ const getAllEmployees = async (
 
     const employees =
       await Employee.find()
-      .select("-password");
+        .select("-password");
 
     res.status(200).json(
       employees
@@ -439,209 +458,209 @@ const getAllEmployees = async (
 };
 
 const updateEmployeeStatus =
-async (req, res) => {
+  async (req, res) => {
 
-  try {
+    try {
 
-    const employee =
-      await Employee.findById(
-        req.params.id
-      );
+      const employee =
+        await Employee.findById(
+          req.params.id
+        );
 
-    if (!employee) {
+      if (!employee) {
 
-      return res.status(404).json({
+        return res.status(404).json({
+          message:
+            "Employee not found",
+        });
+
+      }
+
+      employee.status =
+        employee.status === "Active"
+          ? "Inactive"
+          : "Active";
+
+      await employee.save();
+
+      res.status(200).json({
         message:
-          "Employee not found",
+          "Status Updated",
+        employee,
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          error.message,
       });
 
     }
-
-    employee.status =
-      employee.status === "Active"
-        ? "Inactive"
-        : "Active";
-
-    await employee.save();
-
-    res.status(200).json({
-      message:
-        "Status Updated",
-      employee,
-    });
-
-  } catch (error) {
-
-    res.status(500).json({
-      message:
-        error.message,
-    });
-
-  }
-};
+  };
 
 /* =========================
    CHANGE PASSWORD
 ========================= */
 
 const changePassword =
-async (req, res) => {
+  async (req, res) => {
 
-  try {
+    try {
 
-    const {
-      currentPassword,
-      newPassword,
-    } = req.body;
-
-    const employee =
-      await Employee.findById(
-        req.employee._id
-      );
-
-    if (!employee) {
-
-      return res.status(404).json({
-        message:
-          "Employee not found",
-      });
-
-    }
-
-    const isMatch =
-      await bcrypt.compare(
+      const {
         currentPassword,
-        employee.password
-      );
+        newPassword,
+      } = req.body;
 
-    if (!isMatch) {
+      const employee =
+        await Employee.findById(
+          req.employee._id
+        );
 
-      return res.status(400).json({
+      if (!employee) {
+
+        return res.status(404).json({
+          message:
+            "Employee not found",
+        });
+
+      }
+
+      const isMatch =
+        await bcrypt.compare(
+          currentPassword,
+          employee.password
+        );
+
+      if (!isMatch) {
+
+        return res.status(400).json({
+          message:
+            "Current password is incorrect",
+        });
+
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(
+          newPassword,
+          10
+        );
+
+      employee.password =
+        hashedPassword;
+
+      await employee.save();
+
+      res.status(200).json({
         message:
-          "Current password is incorrect",
+          "Password changed successfully",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          error.message,
       });
 
     }
 
-    const hashedPassword =
-      await bcrypt.hash(
-        newPassword,
-        10
-      );
-
-    employee.password =
-      hashedPassword;
-
-    await employee.save();
-
-    res.status(200).json({
-      message:
-        "Password changed successfully",
-    });
-
-  } catch (error) {
-
-    res.status(500).json({
-      message:
-        error.message,
-    });
-
-  }
-
-};
+  };
 
 
 const uploadProfilePhoto =
-async (req, res) => {
+  async (req, res) => {
 
-  try {
+    try {
 
-    const employee =
-      await Employee.findById(
-        req.employee._id
-      );
+      const employee =
+        await Employee.findById(
+          req.employee._id
+        );
 
-    employee.profilePhoto =
-      req.file.filename;
+      employee.profilePhoto =
+        req.file.filename;
 
-    await employee.save();
+      await employee.save();
 
-    res.status(200).json({
-      message:
-        "Profile photo uploaded",
-      profilePhoto:
-        employee.profilePhoto,
-    });
+      res.status(200).json({
+        message:
+          "Profile photo uploaded",
+        profilePhoto:
+          employee.profilePhoto,
+      });
 
-  } catch (error) {
+    } catch (error) {
 
-    res.status(500).json({
-      message:
-        error.message,
-    });
-
-  }
-
-};
-
-const updateProfile =
-async (req, res) => {
-
-  try {
-
-    const employee =
-      await Employee.findById(
-        req.employee._id
-      );
-
-    if (!employee) {
-
-      return res.status(404).json({
-        message: "Employee not found",
+      res.status(500).json({
+        message:
+          error.message,
       });
 
     }
 
-    employee.fullName =
-      req.body.fullName ||
-      employee.fullName;
+  };
 
-    employee.email =
-      req.body.email ||
-      employee.email;
+const updateProfile =
+  async (req, res) => {
 
-    employee.phoneNumber =
-      req.body.phoneNumber ||
-      employee.phoneNumber;
+    try {
 
-    employee.address =
-      req.body.address ||
-      employee.address;
+      const employee =
+        await Employee.findById(
+          req.employee._id
+        );
 
-    employee.emergencyContact =
-      req.body.emergencyContact ||
-      employee.emergencyContact;
+      if (!employee) {
 
-    await employee.save();
+        return res.status(404).json({
+          message: "Employee not found",
+        });
 
-    res.status(200).json({
-      message:
-        "Profile updated successfully",
-      employee,
-    });
+      }
 
-  } catch (error) {
+      employee.fullName =
+        req.body.fullName ||
+        employee.fullName;
 
-    res.status(500).json({
-      message:
-        error.message,
-    });
+      employee.email =
+        req.body.email ||
+        employee.email;
 
-  }
+      employee.phoneNumber =
+        req.body.phoneNumber ||
+        employee.phoneNumber;
 
-};
+      employee.address =
+        req.body.address ||
+        employee.address;
 
-const LeaveBalance = require("../models/LeaveBalance");
+      employee.emergencyContact =
+        req.body.emergencyContact ||
+        employee.emergencyContact;
+
+      await employee.save();
+
+      res.status(200).json({
+        message:
+          "Profile updated successfully",
+        employee,
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  };
+
+
 
 module.exports = {
   registerEmployee,
@@ -655,5 +674,3 @@ module.exports = {
   updateProfile,
 
 };
-
-

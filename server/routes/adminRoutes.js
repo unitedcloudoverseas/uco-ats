@@ -25,6 +25,8 @@ const {
   getWhitelistIPs,
   addWhitelistIP,
   deleteWhitelistIP,
+  getDetectedIPs,
+  addDetectedIPToWhitelist,
 } = require(
   "../controllers/adminController"
 );
@@ -194,6 +196,20 @@ router.delete(
   protect,
   authorizeRoles("admin"),
   deleteWhitelistIP
+);
+
+router.get(
+  "/detected-ips",
+  protect,
+  authorizeRoles("admin"),
+  getDetectedIPs
+);
+
+router.post(
+  "/detected-ip/:id/approve",
+  protect,
+  authorizeRoles("admin"),
+  addDetectedIPToWhitelist
 );
 
 module.exports = router;
