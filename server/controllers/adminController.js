@@ -905,6 +905,21 @@ async (req, res) => {
 
     }
 
+    const employee =
+      await Employee.findById(
+        detectedIP.employeeId
+      );
+
+    if (!employee) {
+
+      return res.status(404)
+      .json({
+        message:
+          "Employee not found",
+      });
+
+    }
+
     const exists =
       await WhitelistIP.findOne({
 
@@ -915,7 +930,11 @@ async (req, res) => {
 
     if (exists) {
 
-      return res.status(400)
+      await DetectedIP.findByIdAndDelete(
+        detectedIP._id
+      );
+
+      return res.status(200)
       .json({
         message:
           "Already whitelisted",
@@ -936,20 +955,69 @@ async (req, res) => {
 
     });
 
+    const today =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+    const existingAttendance =
+      await Attendance.findOne({
+
+        employeeId:
+          detectedIP.employeeId,
+
+        date:
+          today,
+
+      });
+
+    if (!existingAttendance) {
+
+      await Attendance.create({
+
+        employeeId:
+          detectedIP.employeeId,
+
+        date:
+          today,
+
+        loginTime:
+          detectedIP.lastSeen,
+
+        ipAddress:
+          detectedIP.ipAddress,
+
+        status:
+          "Present",
+
+      });
+
+    }
+
+    await DetectedIP.findByIdAndDelete(
+      detectedIP._id
+    );
+
     res.status(200)
     .json({
+
       message:
-        "Added to whitelist",
+        "IP approved and attendance created",
+
     });
 
   }
 
   catch (error) {
 
+    console.error(error);
+
     res.status(500)
     .json({
+
       message:
         error.message,
+
     });
 
   }

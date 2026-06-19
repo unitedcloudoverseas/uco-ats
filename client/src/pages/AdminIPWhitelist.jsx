@@ -772,7 +772,7 @@ return (
                     cursor-pointer
                     "
                   >
-                    Add To Whitelist
+                    Add To Whitelist & Provide Attendance
                   </button>
 
                 </td>

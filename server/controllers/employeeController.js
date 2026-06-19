@@ -132,11 +132,10 @@ const loginEmployee = async (req, res) => {
       "Unknown";
 
       await DetectedIP.findOneAndUpdate(
-
       {
         ipAddress: userIP,
+        employeeId: employee._id,
       },
-
       {
         ipAddress: userIP,
 
@@ -156,6 +155,26 @@ const loginEmployee = async (req, res) => {
       }
 
     );
+
+    console.log("Saving detected IP:", userIP);
+
+    const savedIP = await DetectedIP.findOneAndUpdate(
+      {
+        ipAddress: userIP,
+      },
+      {
+        ipAddress: userIP,
+        employeeId: employee._id,
+        employeeName: employee.fullName,
+        lastSeen: new Date(),
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+
+    console.log("Saved:", savedIP);
 
     console.log("================================");
     console.log("RENDER LOGIN IP:", userIP);
@@ -201,7 +220,6 @@ const loginEmployee = async (req, res) => {
 
       attendanceMarked =
         true;
-
     }
 
     const token =
@@ -321,30 +339,30 @@ const getMyProfile =
 
   };
 
-const logoutEmployee = async (
-  req,
-  res
-) => {
-  try {
+  const logoutEmployee = async (
+    req,
+    res
+  ) => {
+    try {
 
-    const today =
-      new Date()
-        .toISOString()
-        .split("T")[0];
+      const today =
+        new Date()
+          .toISOString()
+          .split("T")[0];
 
-    const attendance =
-      await Attendance.findOne({
-        employeeId:
-          req.employee._id,
-        date: today,
-      });
+      const attendance =
+        await Attendance.findOne({
+          employeeId:
+            req.employee._id,
+          date: today,
+        });
 
-    if (!attendance) {
-      return res.status(404).json({
-        message:
-          "Attendance not found",
-      });
-    }
+      if (!attendance) {
+        return res.status(404).json({
+          message:
+            "Attendance not found",
+        });
+      }
 
     /* ======================
       BREAK VALIDATION
@@ -569,7 +587,6 @@ const changePassword =
 
   };
 
-
 const uploadProfilePhoto =
   async (req, res) => {
 
@@ -603,74 +620,69 @@ const uploadProfilePhoto =
 
   };
 
-const updateProfile =
-  async (req, res) => {
+  const updateProfile =
+    async (req, res) => {
 
-    try {
+      try {
 
-      const employee =
-        await Employee.findById(
-          req.employee._id
-        );
+        const employee =
+          await Employee.findById(
+            req.employee._id
+          );
 
-      if (!employee) {
+        if (!employee) {
 
-        return res.status(404).json({
-          message: "Employee not found",
+          return res.status(404).json({
+            message: "Employee not found",
+          });
+
+        }
+
+        employee.fullName =
+          req.body.fullName ||
+          employee.fullName;
+
+        employee.email =
+          req.body.email ||
+          employee.email;
+
+        employee.phoneNumber =
+          req.body.phoneNumber ||
+          employee.phoneNumber;
+
+        employee.address =
+          req.body.address ||
+          employee.address;
+
+        employee.emergencyContact =
+          req.body.emergencyContact ||
+          employee.emergencyContact;
+
+        await employee.save();
+
+        res.status(200).json({
+          message:
+            "Profile updated successfully",
+          employee,
         });
 
+      } catch (error) {
+
+        res.status(500).json({
+          message:
+            error.message,
+        });
       }
+    };
 
-      employee.fullName =
-        req.body.fullName ||
-        employee.fullName;
-
-      employee.email =
-        req.body.email ||
-        employee.email;
-
-      employee.phoneNumber =
-        req.body.phoneNumber ||
-        employee.phoneNumber;
-
-      employee.address =
-        req.body.address ||
-        employee.address;
-
-      employee.emergencyContact =
-        req.body.emergencyContact ||
-        employee.emergencyContact;
-
-      await employee.save();
-
-      res.status(200).json({
-        message:
-          "Profile updated successfully",
-        employee,
-      });
-
-    } catch (error) {
-
-      res.status(500).json({
-        message:
-          error.message,
-      });
-
-    }
-
+  module.exports = {
+    registerEmployee,
+    loginEmployee,
+    logoutEmployee,
+    getAllEmployees,
+    updateEmployeeStatus,
+    getMyProfile,
+    changePassword,
+    uploadProfilePhoto,
+    updateProfile,
   };
-
-
-
-module.exports = {
-  registerEmployee,
-  loginEmployee,
-  logoutEmployee,
-  getAllEmployees,
-  updateEmployeeStatus,
-  getMyProfile,
-  changePassword,
-  uploadProfilePhoto,
-  updateProfile,
-
-};
