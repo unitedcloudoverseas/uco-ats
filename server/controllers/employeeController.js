@@ -379,6 +379,17 @@ const getMyProfile =
           date: today,
         });
 
+        console.log("========== LOGOUT ==========");
+        console.log(
+          "EMPLOYEE:",
+          req.employee._id
+        );
+
+        console.log(
+          "ATTENDANCE FOUND:",
+          attendance
+        );
+
       if (!attendance) {
         return res.status(404).json({
           message:
