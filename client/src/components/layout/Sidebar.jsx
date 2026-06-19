@@ -32,6 +32,8 @@ import {
 import logo
     from "../../assets/logo.png";
 
+import API from "../services/api";
+
 const Sidebar = () => {
 
     const navigate =
