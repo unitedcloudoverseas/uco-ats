@@ -360,85 +360,80 @@ const getMyProfile =
     }
 
   };
+
   
-  console.log("========== LOGOUT API HIT ==========");
-  const logoutEmployee = async (
-    req,
-    res
-  ) => {
-    try {
+  const logoutEmployee = async (req, res) => {
+  try {
 
-      const today =
-        new Date()
-          .toISOString()
-          .split("T")[0];
+    console.log("========== LOGOUT API HIT ==========");
 
-      const attendance =
-        await Attendance.findOne({
-          employeeId:
-            req.employee._id,
-          date: today,
-        });
+    const today =
+      new Date()
+        .toISOString()
+        .split("T")[0];
 
-        console.log("========== LOGOUT ==========");
-        console.log(
-          "EMPLOYEE:",
-          req.employee._id
-        );
+    console.log("Employee:", req.employee._id);
+    console.log("Today:", today);
 
-        console.log(
-          "ATTENDANCE FOUND:",
-          attendance
-        );
+    const attendance =
+      await Attendance.findOne({
+        employeeId: req.employee._id,
+        date: today,
+      });
 
-      if (!attendance) {
-        return res.status(404).json({
-          message:
-            "Attendance not found",
-        });
-      }
+    console.log(
+      "Attendance Found:",
+      attendance
+    );
 
-    /* ======================
-      BREAK VALIDATION
-    ========================= */
+    if (!attendance) {
+      console.log(
+        "NO ATTENDANCE FOUND"
+      );
 
-    if (
+      return res.status(404).json({
+        message: "Attendance not found",
+      });
+    }
+
+    console.log(
+      "Break Status:",
       attendance.isOnBreak
-    ) {
+    );
+
+    if (attendance.isOnBreak) {
+
+      console.log(
+        "EMPLOYEE STILL ON BREAK"
+      );
 
       return res.status(400).json({
         message:
           "End break before logout",
       });
-
     }
 
-    /* =======================
-      LOGOUT TIME
-    ========================= */
+    console.log(
+      "SETTING LOGOUT TIME"
+    );
 
     attendance.logoutTime =
       new Date();
-
-    /* =========================
-      TOTAL HOURS
-    ========================= */
 
     const totalHours =
       (
         attendance.logoutTime -
         attendance.loginTime
       ) /
-      (
-        1000 * 60 * 60
-      );
+      (1000 * 60 * 60);
+
+    console.log(
+      "Total Hours:",
+      totalHours
+    );
 
     attendance.totalHours =
       totalHours;
-
-    /* ======================
-      EFFECTIVE HOURS
-    ========================= */
 
     const effectiveHours =
       totalHours -
@@ -447,25 +442,33 @@ const getMyProfile =
         60
       );
 
+    console.log(
+      "Effective Hours:",
+      effectiveHours
+    );
+
     attendance.effectiveHours =
       effectiveHours;
 
-    if (
-      effectiveHours >= 8
-    ) {
-      attendance.status =
-        "Present";
-    } else if (
-      effectiveHours >= 4
-    ) {
-      attendance.status =
-        "Half Day";
-    } else {
-      attendance.status =
-        "Absent";
+    if (effectiveHours >= 8) {
+      attendance.status = "Present";
+    }
+    else if (effectiveHours >= 4) {
+      attendance.status = "Half Day";
+    }
+    else {
+      attendance.status = "Absent";
     }
 
+    console.log(
+      "Saving Attendance..."
+    );
+
     await attendance.save();
+
+    console.log(
+      "ATTENDANCE SAVED SUCCESSFULLY"
+    );
 
     res.status(200).json({
       message:
@@ -475,10 +478,14 @@ const getMyProfile =
 
   } catch (error) {
 
+    console.log(
+      "LOGOUT ERROR:"
+    );
+
+    console.log(error);
+
     res.status(500).json({
       message:
-        "Server Error",
-      error:
         error.message,
     });
 

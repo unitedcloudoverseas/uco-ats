@@ -174,54 +174,42 @@ const Dashboard = () => {
   /* =========================
      EMPLOYEE LOGOUT
   ========================= */
-  const handleLogout =
-    async () => {
+  const handleLogout = async () => {
+  try {
+    console.log("LOGOUT START");
 
-      try {
+    const token =
+      localStorage.getItem("token");
 
-        const token =
-          localStorage.getItem(
-            "token"
-          );
+    const response =
+      await API.post(
+        "/employees/logout",
+        {},
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
 
-        await API.post(
-          "/employees/logout",
-          {},
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+    console.log(
+      "LOGOUT RESPONSE:",
+      response.data
+    );
 
-        localStorage.removeItem(
-          "token"
-        );
+    localStorage.removeItem("token");
+    localStorage.removeItem("employee");
 
-        localStorage.removeItem(
-          "employee"
-        );
-
-        toast.success(
-          "Logout Successful"
-        );
-
-        window.location.href =
-          "/";
-
-      } catch (error) {
-
-        console.log(error);
-
-        toast.error(
-          error.response?.data?.message ||
-          "Logout Failed"
-        );
-
-      }
-
-    };
+    window.location.href = "/";
+  }
+  catch(error) {
+    console.log(
+      "LOGOUT ERROR:",
+      error.response?.data
+    );
+  }
+};
 
   return (
 

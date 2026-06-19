@@ -32,6 +32,8 @@ const AdminSidebar = () => {
 
     const handleLogout = () => {
 
+      console.log("LOGOUT CLICKED");
+
     localStorage.removeItem(
         "token"
     );
