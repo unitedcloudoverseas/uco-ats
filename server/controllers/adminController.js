@@ -928,19 +928,22 @@ async (req, res) => {
 
       });
 
-    if (exists) {
+    if (!exists) {
 
-      await DetectedIP.findByIdAndDelete(
-        detectedIP._id
-      );
+        await WhitelistIP.create({
 
-      return res.status(200)
-      .json({
-        message:
-          "Already whitelisted",
-      });
+          ipAddress:
+            detectedIP.ipAddress,
 
-    }
+          location:
+            "Auto Approved",
+
+          isActive:
+            true,
+
+        });
+
+      }
 
     await WhitelistIP.create({
 
@@ -954,6 +957,71 @@ async (req, res) => {
         true,
 
     });
+
+    const today =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+const addDetectedIPToWhitelist =
+async (req, res) => {
+
+  try {
+
+    const detectedIP =
+      await DetectedIP.findById(
+        req.params.id
+      );
+
+    if (!detectedIP) {
+
+      return res.status(404)
+      .json({
+        message:
+          "IP not found",
+      });
+
+    }
+
+    const employee =
+      await Employee.findById(
+        detectedIP.employeeId
+      );
+
+    if (!employee) {
+
+      return res.status(404)
+      .json({
+        message:
+          "Employee not found",
+      });
+
+    }
+
+    const exists =
+      await WhitelistIP.findOne({
+
+        ipAddress:
+          detectedIP.ipAddress,
+
+      });
+
+    if (!exists) {
+
+      await WhitelistIP.create({
+
+        ipAddress:
+          detectedIP.ipAddress,
+
+        location:
+          "Auto Approved",
+
+        isActive:
+          true,
+
+      });
+
+    }
 
     const today =
       new Date()
@@ -1023,6 +1091,8 @@ async (req, res) => {
   }
 
 };
+
+
 
 module.exports = {
   getDashboardStats,
