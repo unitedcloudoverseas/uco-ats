@@ -62,53 +62,34 @@ const registerEmployee = async (req, res) => {
 const jwt = require("jsonwebtoken");
 
 const loginEmployee = async (req, res) => {
-
   try {
+    const { employeeCode, password } = req.body;
 
-    const {
+    const employee = await Employee.findOne({
       employeeCode,
-      password,
-    } = req.body;
-
-    const employee =
-      await Employee.findOne({
-        employeeCode,
-      });
+    });
 
     if (!employee) {
-
       return res.status(400).json({
-        message:
-          "Invalid Employee Code",
+        message: "Invalid Employee Code",
       });
-
     }
 
-    if (
-      employee.status ===
-      "Inactive"
-    ) {
-
+    if (employee.status === "Inactive") {
       return res.status(403).json({
-        message:
-          "Account Disabled",
+        message: "Account Disabled",
       });
-
     }
 
-    const isMatch =
-      await bcrypt.compare(
-        password,
-        employee.password
-      );
+    const isMatch = await bcrypt.compare(
+      password,
+      employee.password
+    );
 
     if (!isMatch) {
-
       return res.status(400).json({
-        message:
-          "Invalid Password",
+        message: "Invalid Password",
       });
-
     }
 
     const today =
@@ -116,79 +97,92 @@ const loginEmployee = async (req, res) => {
         .toISOString()
         .split("T")[0];
 
-    const existingAttendance =
-      await Attendance.findOne({
-
-        employeeId:
-          employee._id,
-
-        date: today,
-
-      });
-
-    const userIP =
-      req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+    let userIP =
+      req.headers["x-forwarded-for"]
+        ?.split(",")[0]
+        .trim() ||
       req.socket.remoteAddress ||
       "Unknown";
 
-      await DetectedIP.findOneAndUpdate(
-      {
-        ipAddress: userIP,
-        employeeId: employee._id,
-      },
-      {
-        ipAddress: userIP,
+    // Convert IPv6 format to IPv4
+    if (
+      userIP &&
+      userIP.startsWith("::ffff:")
+    ) {
+      userIP = userIP.replace(
+        "::ffff:",
+        ""
+      );
+    }
 
+    console.log(
+      "================================"
+    );
+    console.log(
+      "LOGIN ATTEMPT"
+    );
+    console.log(
+      "EMPLOYEE:",
+      employee.fullName
+    );
+    console.log(
+      "IP:",
+      userIP
+    );
+    console.log(
+      "================================"
+    );
+
+    // Save detected IP
+    const savedIP =
+      await DetectedIP.findOneAndUpdate(
+        {
+          ipAddress: userIP,
+          employeeId:
+            employee._id,
+        },
+        {
+          ipAddress: userIP,
+          employeeId:
+            employee._id,
+          employeeName:
+            employee.fullName,
+          lastSeen:
+            new Date(),
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+    console.log(
+      "DETECTED IP SAVED:",
+      savedIP.ipAddress
+    );
+
+    const existingAttendance =
+      await Attendance.findOne({
         employeeId:
           employee._id,
-
-        employeeName:
-          employee.fullName,
-
-        lastSeen:
-          new Date(),
-      },
-
-      {
-        upsert: true,
-        new: true,
-      }
-
-    );
-
-    console.log("Saving detected IP:", userIP);
-
-    const savedIP = await DetectedIP.findOneAndUpdate(
-      {
-        ipAddress: userIP,
-      },
-      {
-        ipAddress: userIP,
-        employeeId: employee._id,
-        employeeName: employee.fullName,
-        lastSeen: new Date(),
-      },
-      {
-        upsert: true,
-        new: true,
-      }
-    );
-
-    console.log("Saved:", savedIP);
-
-    console.log("================================");
-    console.log("RENDER LOGIN IP:", userIP);
-    console.log("================================");
+        date: today,
+      });
 
     const allowedIP =
       await WhitelistIP.findOne({
-
-        ipAddress:
-          userIP,
-
+        ipAddress: userIP,
         isActive: true,
-
       });
+
+    console.log(
+      "WHITELIST FOUND:",
+      !!allowedIP
+    );
+
+    console.log(
+      "EXISTING ATTENDANCE:",
+      !!existingAttendance
+    );
 
     let attendanceMarked =
       false;
@@ -197,53 +191,71 @@ const loginEmployee = async (req, res) => {
       !existingAttendance &&
       allowedIP &&
       employee.role ===
-      "employee"
+        "employee"
     ) {
+      console.log(
+        "CREATING ATTENDANCE..."
+      );
 
-      await Attendance.create({
+      const attendance =
+        await Attendance.create({
+          employeeId:
+            employee._id,
+          date: today,
+          loginTime:
+            new Date(),
+          ipAddress:
+            userIP,
+          status:
+            "Present",
+        });
 
-        employeeId:
-          employee._id,
-
-        date: today,
-
-        loginTime:
-          new Date(),
-
-        ipAddress:
-          userIP,
-
-        status:
-          "Present",
-
-      });
+      console.log(
+        "ATTENDANCE CREATED:",
+        attendance._id
+      );
 
       attendanceMarked =
         true;
     }
 
-    const token =
-      jwt.sign(
+    if (
+      existingAttendance &&
+      !existingAttendance.loginTime &&
+      allowedIP
+    ) {
+      existingAttendance.loginTime =
+        new Date();
 
-        {
-          id:
-            employee._id,
+      existingAttendance.ipAddress =
+        userIP;
 
-          role:
-            employee.role,
-        },
+      await existingAttendance.save();
 
-        process.env.JWT_SECRET,
-
-        {
-          expiresIn:
-            "1d",
-        }
-
+      console.log(
+        "UPDATED EXISTING ATTENDANCE LOGIN TIME"
       );
 
-    res.status(200).json({
+      attendanceMarked =
+        true;
+    }
 
+    const token = jwt.sign(
+      {
+        id: employee._id,
+        role: employee.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    console.log(
+      "LOGIN SUCCESS"
+    );
+
+    res.status(200).json({
       message:
         "Login Successful",
 
@@ -255,50 +267,31 @@ const loginEmployee = async (req, res) => {
       token,
 
       employee: {
-
-        id:
-          employee._id,
-
+        id: employee._id,
         fullName:
           employee.fullName,
-
         employeeCode:
           employee.employeeCode,
-
         role:
           employee.role,
-
         profilePhoto:
           employee.profilePhoto,
-
       },
-
     });
-
-  }
-
-  catch (error) {
-
+  } catch (error) {
     console.error(
       "LOGIN ERROR:"
     );
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     res.status(500).json({
-
       message:
         error.message,
-
       stack:
         error.stack,
-
     });
-
   }
-
 };
 
 /* =========================
