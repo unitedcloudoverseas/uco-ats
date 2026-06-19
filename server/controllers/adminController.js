@@ -961,9 +961,30 @@ async (req, res) => {
 
       });
 
+      console.log(
+        "APPROVING:",
+        employee.fullName
+      );
+
+      console.log(
+        "EMPLOYEE ID:",
+        detectedIP.employeeId
+      );
+
+      console.log(
+        "EXISTING ATTENDANCE:",
+        existingAttendance
+      );
+
     if (!existingAttendance) {
+      console.log(
+        "CREATING ATTENDANCE FOR:",
+        employee.fullName
+      );
 
       await Attendance.create({
+
+        
 
         employeeId:
           detectedIP.employeeId,
