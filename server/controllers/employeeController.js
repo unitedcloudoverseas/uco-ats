@@ -360,7 +360,8 @@ const getMyProfile =
     }
 
   };
-
+  
+  console.log("========== LOGOUT API HIT ==========");
   const logoutEmployee = async (
     req,
     res
