@@ -59,14 +59,51 @@ const Sidebar = () => {
         setProfileOpen,
     ] = useState(false);
 
-    const logout =
-        () => {
+    const logout = async () => {
 
-            localStorage.clear();
+    try {
 
-            navigate("/");
+        console.log("LOGOUT FUNCTION HIT");
 
-        };
+        const token =
+            localStorage.getItem("token");
+
+        await API.post(
+            "/employees/logout",
+            {},
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`,
+                },
+            }
+        );
+
+        console.log(
+            "LOGOUT API SUCCESS"
+        );
+
+        localStorage.clear();
+
+        navigate("/");
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "LOGOUT ERROR"
+        );
+
+        console.log(error);
+
+        localStorage.clear();
+
+        navigate("/");
+
+    }
+
+};
 
     return (
 
