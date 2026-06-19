@@ -175,6 +175,8 @@ const Dashboard = () => {
      EMPLOYEE LOGOUT
   ========================= */
   const handleLogout = async () => {
+
+      console.log("HANDLE LOGOUT FUNCTION HIT");
   try {
     console.log("LOGOUT START");
 
