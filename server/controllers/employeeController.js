@@ -184,18 +184,55 @@ const loginEmployee = async (req, res) => {
       !!existingAttendance
     );
 
+    console.log("========== DEBUG ==========");
+    console.log("Employee:", employee.fullName);
+    console.log("Role:", employee.role);
+    console.log("IP:", userIP);
+    console.log("Allowed IP:", allowedIP);
+    console.log("Existing Attendance:", existingAttendance);
+    console.log("===========================");
+
     let attendanceMarked =
       false;
 
     if (
-      !existingAttendance &&
-      allowedIP &&
-      employee.role ===
-        "employee"
-    ) {
+  !existingAttendance &&
+  allowedIP &&
+  employee.role === "employee"
+) {
+  console.log("INSIDE ATTENDANCE BLOCK");
+
+  try {
+    const attendance = await Attendance.create({
+      employeeId: employee._id,
+      date: today,
+      loginTime: new Date(),
+      ipAddress: userIP,
+      status: "Present",
+    });
+
+    console.log(
+      "ATTENDANCE CREATED:",
+      attendance
+    );
+
+    attendanceMarked = true;
+
+  } catch (err) {
+
+    console.log(
+      "ATTENDANCE CREATE ERROR:"
+    );
+
+    console.log(err);
+
+  }
+} {
       console.log(
         "CREATING ATTENDANCE..."
       );
+
+
 
       const attendance =
         await Attendance.create({
