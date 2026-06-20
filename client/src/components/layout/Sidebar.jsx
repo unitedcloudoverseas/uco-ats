@@ -29,10 +29,9 @@ import {
     NavLink,
 } from "react-router-dom";
 
-import logo
-    from "../../assets/logo.png";
+import logo from "../../assets/logo.png";
 
-import API from "../services/api";
+import API from "../../services/api";
 
 const Sidebar = () => {
 
