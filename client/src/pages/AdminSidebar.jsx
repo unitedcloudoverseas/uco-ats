@@ -30,22 +30,35 @@ const AdminSidebar = () => {
     const navigate =
         useNavigate();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
 
-      console.log("LOGOUT CLICKED");
+  try {
 
-    localStorage.removeItem(
-        "token"
+    const token =
+      localStorage.getItem("token");
+
+    await API.post(
+      "/employees/logout",
+      {},
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+        },
+      }
     );
 
-    localStorage.removeItem(
-        "employee"
-    );
+  } catch (error) {
 
-    navigate("/");
+    console.log(error);
 
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("employee");
+
+  navigate("/");
 };
-
   return (
 
   <aside

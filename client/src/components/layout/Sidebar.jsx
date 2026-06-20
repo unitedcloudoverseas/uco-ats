@@ -65,7 +65,9 @@ const Sidebar = () => {
 
     try {
 
-        console.log("LOGOUT FUNCTION HIT");
+        console.log(
+  "========== LOGOUT API HIT =========="
+);
 
         const token =
             localStorage.getItem("token");
