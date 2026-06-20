@@ -121,47 +121,40 @@ const [
 
     
 
-  return (
+return (
 
-  <div className="p-8">
+  <div className="p-4 md:p-8 bg-slate-950 min-h-screen text-white">
 
     {/* PAGE HEADER */}
 
     <div
       className="
-      bg-white
+      bg-slate-900/80
+      backdrop-blur-xl
       border
-      border-slate-200
+      border-slate-800
       rounded-3xl
-      p-8
+      p-6 md:p-8
       mb-8
       "
     >
-
       <h1
         className="
-        text-4xl
+        text-3xl md:text-4xl
         font-bold
         tracking-tight
-        text-slate-900
+        text-white
         "
       >
         Leave Balance
       </h1>
 
-      <p
-        className="
-        mt-2
-        text-slate-500
-        "
-      >
+      <p className="mt-2 text-slate-400">
         View your available leave balances
       </p>
-
     </div>
 
     {balance && (
-
       <>
 
         {/* BALANCE CARDS */}
@@ -176,112 +169,85 @@ const [
           "
         >
 
+          {/* Casual Leave */}
+
           <div
             className="
-            bg-white
+            bg-slate-900/80
+            backdrop-blur-xl
             border
-            border-slate-200
+            border-slate-800
+            hover:border-orange-500/40
+            transition-all
             rounded-3xl
             p-6
             "
           >
-
-            <p className="text-slate-500">
+            <p className="text-slate-400">
               Casual Leave
             </p>
 
-            <h2
-              className="
-              text-5xl
-              font-bold
-              mt-3
-              "
-            >
+            <h2 className="text-4xl md:text-5xl font-bold mt-3">
               {balance.casualLeave}
             </h2>
 
-            <p
-              className="
-              mt-2
-              text-sm
-              text-slate-400
-              "
-            >
+            <p className="mt-2 text-sm text-slate-500">
               Remaining Days
             </p>
-
           </div>
+
+          {/* Sick Leave */}
 
           <div
             className="
-            bg-white
+            bg-slate-900/80
+            backdrop-blur-xl
             border
-            border-slate-200
+            border-slate-800
+            hover:border-orange-500/40
+            transition-all
             rounded-3xl
             p-6
             "
           >
-
-            <p className="text-slate-500">
+            <p className="text-slate-400">
               Sick Leave
             </p>
 
-            <h2
-              className="
-              text-5xl
-              font-bold
-              mt-3
-              "
-            >
+            <h2 className="text-4xl md:text-5xl font-bold mt-3">
               {balance.sickLeave}
             </h2>
 
-            <p
-              className="
-              mt-2
-              text-sm
-              text-slate-400
-              "
-            >
+            <p className="mt-2 text-sm text-slate-500">
               Remaining Days
             </p>
-
           </div>
+
+          {/* Earned Leave */}
 
           <div
             className="
-            bg-white
+            bg-slate-900/80
+            backdrop-blur-xl
             border
-            border-slate-200
+            border-slate-800
+            hover:border-orange-500/40
+            transition-all
             rounded-3xl
             p-6
             "
           >
-
-            <p className="text-slate-500">
+            <p className="text-slate-400">
               Earned Leave
             </p>
 
-            <h2
-              className="
-              text-5xl
-              font-bold
-              mt-3
-              "
-            >
+            <h2 className="text-4xl md:text-5xl font-bold mt-3">
               {balance.earnedLeave}
             </h2>
 
-            <p
-              className="
-              mt-2
-              text-sm
-              text-slate-400
-              "
-            >
+            <p className="mt-2 text-sm text-slate-500">
               Remaining Days
             </p>
-
           </div>
 
         </div>
@@ -290,22 +256,16 @@ const [
 
         <div
           className="
-          bg-white
+          bg-slate-900/80
+          backdrop-blur-xl
           border
-          border-slate-200
+          border-slate-800
           rounded-3xl
-          p-8
+          p-6 md:p-8
           mb-8
           "
         >
-
-          <h2
-            className="
-            text-xl
-            font-semibold
-            mb-8
-            "
-          >
+          <h2 className="text-xl font-semibold mb-8 text-white">
             Leave Analytics
           </h2>
 
@@ -318,26 +278,24 @@ const [
             "
           >
 
+            {/* Total Available */}
+
             <div
               className="
               border
-              border-slate-200
+              border-slate-800
+              bg-slate-950
               rounded-2xl
               p-6
+              hover:border-orange-500/30
+              transition-all
               "
             >
-
-              <p className="text-slate-500">
+              <p className="text-slate-400">
                 Total Available
               </p>
 
-              <h3
-                className="
-                text-4xl
-                font-bold
-                mt-3
-                "
-              >
+              <h3 className="text-3xl md:text-4xl font-bold mt-3">
                 {
                   balance.casualLeave +
                   balance.sickLeave +
@@ -345,38 +303,29 @@ const [
                 }
               </h3>
 
-              <p
-                className="
-                text-sm
-                text-slate-400
-                mt-2
-                "
-              >
+              <p className="text-sm text-slate-500 mt-2">
                 Remaining Days
               </p>
-
             </div>
+
+            {/* Highest Balance */}
 
             <div
               className="
               border
-              border-slate-200
+              border-slate-800
+              bg-slate-950
               rounded-2xl
               p-6
+              hover:border-orange-500/30
+              transition-all
               "
             >
-
-              <p className="text-slate-500">
+              <p className="text-slate-400">
                 Highest Balance
               </p>
 
-              <h3
-                className="
-                text-2xl
-                font-bold
-                mt-3
-                "
-              >
+              <h3 className="text-2xl font-bold mt-3">
                 {[
                   {
                     name: "Casual Leave",
@@ -392,157 +341,114 @@ const [
                   },
                 ].reduce(
                   (max, current) =>
-                    current.value >
-                    max.value
+                    current.value > max.value
                       ? current
                       : max
                 ).name}
               </h3>
 
-              <p
-                className="
-                text-sm
-                text-slate-400
-                mt-2
-                "
-              >
+              <p className="text-sm text-slate-500 mt-2">
                 Most Available Leave
               </p>
-
             </div>
 
+            {/* Pending Requests */}
+
             <div
-  className="
-  border
-  border-slate-200
-  rounded-2xl
-  p-6
-  "
->
+              className="
+              border
+              border-slate-800
+              bg-slate-950
+              rounded-2xl
+              p-6
+              hover:border-orange-500/30
+              transition-all
+              "
+            >
+              <p className="text-slate-400">
+                Pending Requests
+              </p>
 
-  <p className="text-slate-500">
-    Pending Requests
-  </p>
+              <h3 className="text-3xl md:text-4xl font-bold mt-3">
+                {analytics.pendingCount}
+              </h3>
 
-  <h3
-    className="
-    text-4xl
-    font-bold
-    mt-3
-    "
-  >
-    {analytics.pendingCount}
-  </h3>
-
-  <p
-    className="
-    text-sm
-    text-slate-400
-    mt-2
-    "
-  >
-    Awaiting Approval
-  </p>
-
-</div>
+              <p className="text-sm text-slate-500 mt-2">
+                Awaiting Approval
+              </p>
+            </div>
 
           </div>
-
         </div>
 
         {/* LEAVE USAGE TREND */}
 
         <div
           className="
-          bg-white
+          bg-slate-900/80
+          backdrop-blur-xl
           border
-          border-slate-200
+          border-slate-800
           rounded-3xl
-          p-8
+          p-6 md:p-8
           "
         >
-
-          <h2
-            className="
-            text-xl
-            font-semibold
-            mb-8
-            "
-          >
+          <h2 className="text-xl font-semibold mb-8 text-white">
             Leave Usage Trend
           </h2>
 
-          {Object.keys(
-            analytics.monthlyUsage
-          ).length > 0 ? (
+          {Object.keys(analytics.monthlyUsage).length > 0 ? (
 
             <div className="space-y-6">
 
               {Object.entries(
                 analytics.monthlyUsage
-              ).map(
-                ([month, days]) => (
+              ).map(([month, days]) => (
+
+                <div key={month}>
 
                   <div
-                    key={month}
+                    className="
+                    flex
+                    justify-between
+                    mb-2
+                    "
                   >
+                    <span className="font-medium">
+                      {month}
+                    </span>
 
-                    <div
-                      className="
-                      flex
-                      justify-between
-                      mb-2
-                      "
-                    >
-
-                      <span
-                        className="
-                        font-medium
-                        "
-                      >
-                        {month}
-                      </span>
-
-                      <span
-                        className="
-                        text-slate-500
-                        "
-                      >
-                        {days} Days
-                      </span>
-
-                    </div>
-
-                    <div
-                      className="
-                      h-3
-                      bg-slate-100
-                      rounded-full
-                      overflow-hidden
-                      "
-                    >
-
-                      <div
-                        className="
-                        h-full
-                        bg-orange-500
-                        rounded-full
-                        "
-                        style={{
-                          width:
-                            `${Math.min(
-                              days * 10,
-                              100
-                            )}%`,
-                        }}
-                      />
-
-                    </div>
-
+                    <span className="text-slate-400">
+                      {days} Days
+                    </span>
                   </div>
 
-                )
-              )}
+                  <div
+                    className="
+                    h-3
+                    bg-slate-800
+                    rounded-full
+                    overflow-hidden
+                    "
+                  >
+                    <div
+                      className="
+                      h-full
+                      bg-orange-500
+                      rounded-full
+                      "
+                      style={{
+                        width: `${Math.min(
+                          days * 10,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+
+                </div>
+
+              ))}
 
             </div>
 
@@ -552,7 +458,7 @@ const [
               className="
               text-center
               py-12
-              text-slate-500
+              text-slate-400
               "
             >
               No leave analytics available yet.
@@ -563,12 +469,12 @@ const [
         </div>
 
       </>
-
     )}
 
   </div>
 
 );
+
 };
 
 export default LeaveBalance;
