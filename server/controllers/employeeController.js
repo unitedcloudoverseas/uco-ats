@@ -450,7 +450,7 @@ const getMyProfile =
     attendance.effectiveHours =
       effectiveHours;
 
-    if (effectiveHours >= 8) {
+    if (effectiveHours >= 7) {
       attendance.status = "Present";
     }
     else if (effectiveHours >= 4) {
